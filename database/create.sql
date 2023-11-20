@@ -15,18 +15,20 @@ CREATE TABLE Employee
 	supervisor_id	INT,
 	CONSTRAINT 		check_age		CHECK(DATEDIFF(YEAR, bdate, GETDATE()) > 18)
 );
-CREATE TABLE Employee_email 
+CREATE TABLE Employee_Email 
 (	
-	emp_id		INT 			PRIMARY KEY,
+	emp_id		INT				NOT NULL,	
 	email		VARCHAR(50) 	NOT NULL,
+	CONSTRAINT 	pk_emp_email	PRIMARY KEY (emp_id, email),
 	CONSTRAINT	fk_emp_email_id FOREIGN KEY (emp_id)
 				REFERENCES Employee(id) 
 				ON DELETE CASCADE
 );
-CREATE TABLE Employee_phone 
+CREATE TABLE Employee_Phone 
 (	
-	emp_id 		INT 			PRIMARY KEY,
-	phone		CHAR(10) 		NOT NULL,
+	emp_id 		INT				NOT NULL,
+	phone		CHAR(12) 		NOT NULL,
+	CONSTRAINT 	pk_emp_phone	PRIMARY KEY (emp_id, phone),
 	CONSTRAINT 	fk_emp_phone_id 	FOREIGN KEY (emp_id)
 				REFERENCES Employee(id) 
 				ON DELETE CASCADE
@@ -77,7 +79,7 @@ CREATE TABLE Branch
 	mgr_id 		INT,
 	name 		VARCHAR(20),
 	address		VARCHAR(50),
-	phone 		CHAR(10)
+	phone 		CHAR(12)
 	CONSTRAINT 	pk_branch 			PRIMARY KEY (region_id, number),
 	CONSTRAINT	fk_branch_region 	FOREIGN KEY (region_id)
 				REFERENCES Region(id)
@@ -91,7 +93,7 @@ CREATE TABLE Supplier
 	id			INT IDENTITY 		PRIMARY KEY,
 	name 		VARCHAR(20),
 	address		VARCHAR(255),
-	phone 		CHAR(10)	
+	phone 		CHAR(12)	
 );
 CREATE TABLE Branch_Supplier
 (	region_id 		INT			NOT NULL,
@@ -216,24 +218,29 @@ CREATE TABLE Customer
 	name		VARCHAR(20) 	NOT NULL
 );
 CREATE TABLE Customer_Email
-(	cus_id		INT 			PRIMARY KEY,
+(	cus_id		INT 			NOT NULL,
 	email		VARCHAR(50)		NOT NULL,
+	CONSTRAINT	pk_cus_email	PRIMARY KEY (cus_id, email),
 	CONSTRAINT	fk_cus_email	FOREIGN KEY (cus_id)
 				REFERENCES	Customer(id)
 				ON DELETE CASCADE
 );
 CREATE TABLE Customer_Address
-(	cus_id				INT PRIMARY KEY,
+(	
+	cus_id				INT 		 NOT NULL,
 	address_street		VARCHAR(255) NOT NULL,
 	address_district	VARCHAR(255) NOT NULL,
 	address_city		VARCHAR(255) NOT NULL,
+	CONSTRAINT	pk_cus_address	PRIMARY KEY (cus_id, address_street, address_district, address_city),
 	CONSTRAINT	fk_cus_address	FOREIGN KEY (cus_id)
 				REFERENCES		Customer(id)
 				ON DELETE CASCADE
 );
 CREATE TABLE Customer_Phone
-(	cus_id		INT 			PRIMARY KEY,
-	phone		CHAR(10)		NOT NULL,
+(	
+	cus_id		INT 			NOT NULL,
+	phone		CHAR(12)		NOT NULL,
+	CONSTRAINT	pk_cus_phone	PRIMARY KEY (cus_id, phone),
 	CONSTRAINT	fk_cus_phone	FOREIGN KEY (cus_id)
 				REFERENCES		Customer (id)
 				ON DELETE CASCADE
