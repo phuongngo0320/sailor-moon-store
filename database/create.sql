@@ -1,10 +1,10 @@
-DROP DATABASE IF EXISTS SailorMoonStore
-CREATE DATABASE SailorMoonStore
+DROP DATABASE IF EXISTS SailorMoonStore;
+CREATE DATABASE SailorMoonStore;
 USE SailorMoonStore;
 GO
 
 CREATE TABLE Employee 
-(	id 				INT 			PRIMARY KEY,
+(	id 				INT IDENTITY	PRIMARY KEY,
 	name 			VARCHAR(20) 	NOT NULL, 
 	bdate			DATE,
 	address			VARCHAR(255),
@@ -115,11 +115,16 @@ CREATE TABLE Orders
 (	
 	id				INT IDENTITY 		PRIMARY KEY,
 	order_time 		DATETIME,
+	region_id		INT,
+	branch_no		INT,
 	salesman_id		INT,
 	shipper_id		INT,
 	dlvr_start		DATETIME,
 	dlvr_end		DATETIME,
-	cus_id			INT
+	cus_id			INT,
+	order_status	VARCHAR(20),
+	CONSTRAINT		fk_order_branch		FOREIGN KEY (region_id, branch_no)
+					REFERENCES Branch(region_id, number),
 	CONSTRAINT		fk_order_saleman 	FOREIGN KEY (salesman_id )
 					REFERENCES Salesman(salesman_id),
 	CONSTRAINT		fk_order_shipper	FOREIGN KEY (shipper_id)
@@ -143,12 +148,24 @@ CREATE TABLE Product
 				--ON DELETE CASCADE
 		
 );
+CREATE TABLE Branch_Product 
+(
+	region_id		INT,
+	branch_no		INT,
+	product_id		INT
+	CONSTRAINT		pk_branch_product	PRIMARY KEY (region_id, branch_no, product_id),
+	CONSTRAINT		fk_brpro_branch		FOREIGN KEY (region_id, branch_no)
+					REFERENCES Branch(region_id, number),
+	CONSTRAINT		fk_brpro_product	FOREIGN KEY (product_id)
+					REFERENCES Product(id)
+)
 CREATE TABLE Order_Detail
 (	
 	product_id 		INT,
 	order_id 		INT,
-	unit_price		INT 			NOT NULL,
-	quantity		INT 			NOT NULL,
+	unit_price		INT NOT NULL,
+	quantity		INT NOT NULL,
+	promo_amount	INT	NOT NULL,
 	CONSTRAINT 		pk_order_detail 	PRIMARY KEY (product_id ,order_id ),
 	CONSTRAINT		fk_odetail_order 	FOREIGN KEY (order_id )
 					REFERENCES Orders (id) 
@@ -194,7 +211,8 @@ CREATE TABLE Promotion_Product
 );
 
 CREATE TABLE Customer
-(	id 			INT IDENTITY 	PRIMARY KEY,
+(	
+	id 			INT IDENTITY 	PRIMARY KEY,
 	name		VARCHAR(20) 	NOT NULL
 );
 CREATE TABLE Customer_Email
@@ -205,8 +223,10 @@ CREATE TABLE Customer_Email
 				ON DELETE CASCADE
 );
 CREATE TABLE Customer_Address
-(	cus_id		INT 			PRIMARY KEY,
-	address		VARCHAR(255)	NOT NULL,
+(	cus_id				INT PRIMARY KEY,
+	address_street		VARCHAR(255) NOT NULL,
+	address_district	VARCHAR(255) NOT NULL,
+	address_city		VARCHAR(255) NOT NULL,
 	CONSTRAINT	fk_cus_address	FOREIGN KEY (cus_id)
 				REFERENCES		Customer(id)
 				ON DELETE CASCADE
@@ -227,7 +247,8 @@ CREATE TABLE Membership_Level
 	discount_amount	INT			NOT NULL
 );
 CREATE TABLE Membership_Card
-(	card_id				INT IDENTITY PRIMARY KEY,
+(	
+	card_id				INT IDENTITY PRIMARY KEY,
 	cus_id				INT			NOT NULL,
 	card_point			INT			NOT NULL,
 	registration_date	DATE,	
