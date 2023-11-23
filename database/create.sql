@@ -1,5 +1,6 @@
 DROP DATABASE IF EXISTS SailorMoonStore;
 CREATE DATABASE SailorMoonStore;
+------------------------------------------------------------------------
 USE SailorMoonStore;
 GO
 
@@ -12,8 +13,7 @@ CREATE TABLE Employee
 	salary			INT,
 	region_id 		INT,
 	branch_no		INT,
-	supervisor_id	INT,
-	CONSTRAINT 		check_age		CHECK(DATEDIFF(YEAR, bdate, GETDATE()) > 18)
+	supervisor_id	INT
 );
 CREATE TABLE Employee_Email 
 (	
@@ -71,7 +71,7 @@ CREATE TABLE Region
 (
 	id 				INT IDENTITY 		PRIMARY KEY,
 	name			VARCHAR(20),
-	area			INT
+	area			DECIMAL(10, 2)
 );
 CREATE TABLE Branch
 (	region_id 	INT			NOT NULL,
@@ -93,7 +93,7 @@ CREATE TABLE Supplier
 	id			INT IDENTITY 		PRIMARY KEY,
 	name 		VARCHAR(20),
 	address		VARCHAR(255),
-	phone 		CHAR(12)	
+	phone 		VARCHAR(13)	
 );
 CREATE TABLE Branch_Supplier
 (	region_id 		INT			NOT NULL,
@@ -282,9 +282,6 @@ CREATE TABLE Review
 					ON DELETE CASCADE
 );
 
-
-
--------------------------------------------------------------------------------------------------
 ALTER TABLE Employee 
 ADD CONSTRAINT	fk_emp_region_branch	FOREIGN KEY (region_id, branch_no)
 				REFERENCES Branch(region_id, number);
@@ -293,82 +290,29 @@ ALTER TABLE Employee
 ADD CONSTRAINT	fk_emp_super			FOREIGN KEY (supervisor_id) 
 				REFERENCES Employee(id);
 
---ALTER TABLE Employee_email 
---(	
-	
---);
---ALTER TABLE Employee_phone 
---(	
-	
---);
---ALTER TABLE Manager 
---(	
-	
---);
---ALTER TABLE Accountant
---(	
-	
---);
---ALTER TABLE Salesman
---(	
-	
---);
---ALTER TABLE Shipper
-	
---);
---ALTER TABLE Region
-	
---);
---ALTER TABLE Branch
-	
---);
---ALTER TABLE Supplier
-	
---);
---ALTER TABLE Branch_and_Supplier
-	
---);
---ALTER TABLE Category
-	
---);
 ALTER TABLE Orders
 ADD CONSTRAINT	fk_order_customer	FOREIGN KEY (cus_id)
 				REFERENCES Customer(id);
 				--ON DELETE CASCADE;
---ALTER TABLE Order_Include
-	
---);
---ALTER TABLE Product
-	
---);
---ALTER TABLE Bill
-	
---);
---ALTER TABLE Promotion
-	
---);
---ALTER TABLE Promotion_Apply
-	
---);
---ALTER TABLE Review
-	
---);
---ALTER TABLE Customer
-	
---);
---ALTER TABLE Customer_Email
-	
---);
---ALTER TABLE Customer_Address
-	
---);
---ALTER TABLE Customerr_Phone
-	
---);
---ALTER TABLE Membership_Card
-	
---);
---ALTER TABLE Membership_Level
-	
---);
+
+-------------------------------------------------------------------------------------------------
+-- SEMANTIC CONSTRAINTS
+
+ALTER TABLE Employee 
+ADD CONSTRAINT emp_age_check 		CHECK(DATEDIFF(YEAR, bdate, GETDATE()) > 18);
+
+ALTER TABLE Employee_Email 
+ADD CONSTRAINT emp_email_check 		CHECK(email LIKE '%_@_%._%');
+
+ALTER TABLE Customer_Email 
+ADD CONSTRAINT cus_email_check		CHECK(email LIKE '%_@_%._%');
+
+ALTER TABLE Promotion
+ADD CONSTRAINT promo_date_check 	CHECK(start_time < end_time);
+
+ALTER TABLE Employee 
+ADD CONSTRAINT emp_start_date_check	CHECK(bdate < start_date);
+
+ALTER TABLE Orders 
+ADD CONSTRAINT order_dlvr_time_check CHECK(dlvr_start < dlvr_end);
 
