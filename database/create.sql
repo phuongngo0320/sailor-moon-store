@@ -182,6 +182,7 @@ CREATE TABLE Bill
 	acct_id 		INT,
 	issue_time		DATETIME,
 	dlvr_time		DATETIME,
+	dlvr_fee		INT,
 	dlvr_address_street		VARCHAR(50),
 	dlvr_address_district	VARCHAR(50),
 	dlvr_address_city		VARCHAR(50),
