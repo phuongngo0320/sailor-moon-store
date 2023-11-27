@@ -1,3 +1,6 @@
+USE MASTER;
+GO
+ALTER DATABASE SailorMoonStore SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
 DROP DATABASE IF EXISTS SailorMoonStore;
 CREATE DATABASE SailorMoonStore;
 ------------------------------------------------------------------------
@@ -229,9 +232,9 @@ CREATE TABLE Customer_Email
 CREATE TABLE Customer_Address
 (	
 	cus_id				INT 		 NOT NULL,
-	address_street		NVARCHAR(255) NOT NULL,
-	address_district	NVARCHAR(255) NOT NULL,
-	address_city		NVARCHAR(255) NOT NULL,
+	address_street		NVARCHAR(50) NOT NULL,
+	address_district	NVARCHAR(50) NOT NULL,
+	address_city		NVARCHAR(50) NOT NULL,
 	CONSTRAINT	pk_cus_address	PRIMARY KEY (cus_id, address_street, address_district, address_city),
 	CONSTRAINT	fk_cus_address	FOREIGN KEY (cus_id)
 				REFERENCES		Customer(id)
