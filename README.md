@@ -50,9 +50,11 @@ Kết nối:
 
 6. Tạo model trong `src/models/`, mẫu model cho bảng Region xem trong file `region.php`
 
-7. Sử dụng model để truy xuất dữ liệu, minh họa trong `public/index.php`
+7. Thêm `require_once __DIR__ . '/models/<ten file model>'` vào `src/bootstrap.php`
 
-8. Chạy thử: dùng lệnh `php -S` hoặc dùng XAMPP
+8. Sử dụng model để truy xuất dữ liệu, minh họa trong `public/index.php`
+
+9. Chạy thử: dùng lệnh `php -S` hoặc dùng XAMPP
 
 Xem thêm về PHP: [PHP Tutorial](https://www.phptutorial.net/)
 
