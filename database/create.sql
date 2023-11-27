@@ -6,9 +6,9 @@ GO
 
 CREATE TABLE Employee 
 (	id 				INT IDENTITY	PRIMARY KEY,
-	name 			VARCHAR(20) 	NOT NULL, 
+	name 			NVARCHAR(20) 	NOT NULL, 
 	bdate			DATE,
-	address			VARCHAR(255),
+	address			NVARCHAR(255),
 	start_date		DATE,
 	salary			INT,
 	region_id 		INT,
@@ -37,8 +37,8 @@ CREATE TABLE Employee_Phone
 CREATE TABLE Manager 
 (	
 	mgr_id				INT 			PRIMARY KEY,	
-	mgr_skill			VARCHAR(50),
-	mgr_qualification	VARCHAR(50),
+	mgr_skill			NVARCHAR(50),
+	mgr_qualification	NVARCHAR(50),
 	CONSTRAINT			fk_emp_mgr_id	FOREIGN KEY (mgr_id)
 						REFERENCES Employee(id) 
 						ON DELETE CASCADE
@@ -46,7 +46,7 @@ CREATE TABLE Manager
 CREATE TABLE Accountant
 (	
 	acct_id 			INT 			PRIMARY KEY,
-	acct_certificate	VARCHAR(50),
+	acct_certificate	NVARCHAR(50),
 	CONSTRAINT			fk_emp_acct_id 	FOREIGN KEY (acct_id)
 						REFERENCES Employee(id) 
 						ON DELETE CASCADE
@@ -54,7 +54,7 @@ CREATE TABLE Accountant
 CREATE TABLE Salesman
 (	
 	salesman_id			INT 			PRIMARY KEY,
-	salesman_mktg_skill	VARCHAR(50),
+	salesman_mktg_skill	NVARCHAR(50),
 	CONSTRAINT			fk_emp_salesman_id 		FOREIGN KEY (salesman_id)
 						REFERENCES Employee(id) 
 						ON DELETE CASCADE
@@ -70,15 +70,15 @@ CREATE TABLE Shipper
 CREATE TABLE Region
 (
 	id 				INT IDENTITY 		PRIMARY KEY,
-	name			VARCHAR(20),
+	name			NVARCHAR(20),
 	area			DECIMAL(10, 2)
 );
 CREATE TABLE Branch
 (	region_id 	INT			NOT NULL,
 	number 		INT			NOT NULL,
 	mgr_id 		INT,
-	name 		VARCHAR(20),
-	address		VARCHAR(50),
+	name 		NVARCHAR(20),
+	address		NVARCHAR(50),
 	phone 		CHAR(12)
 	CONSTRAINT 	pk_branch 			PRIMARY KEY (region_id, number),
 	CONSTRAINT	fk_branch_region 	FOREIGN KEY (region_id)
@@ -91,8 +91,8 @@ CREATE TABLE Branch
 CREATE TABLE Supplier
 (
 	id			INT IDENTITY 		PRIMARY KEY,
-	name 		VARCHAR(20),
-	address		VARCHAR(255),
+	name 		NVARCHAR(20),
+	address		NVARCHAR(255),
 	phone 		VARCHAR(13)	
 );
 CREATE TABLE Branch_Supplier
@@ -110,8 +110,8 @@ CREATE TABLE Branch_Supplier
 CREATE TABLE Category
 (	
 	id				INT IDENTITY 		PRIMARY KEY,
-	name			VARCHAR(20) 	NOT NULL,
-	descr			VARCHAR(255)
+	name			NVARCHAR(20) 	NOT NULL,
+	descr			NVARCHAR(255)
 );
 CREATE TABLE Orders
 (	
@@ -124,7 +124,7 @@ CREATE TABLE Orders
 	dlvr_start		DATETIME,
 	dlvr_end		DATETIME,
 	cus_id			INT,
-	order_status	VARCHAR(20),
+	order_status	NVARCHAR(20),
 	CONSTRAINT		fk_order_branch		FOREIGN KEY (region_id, branch_no)
 					REFERENCES Branch(region_id, number),
 	CONSTRAINT		fk_order_saleman 	FOREIGN KEY (salesman_id )
@@ -136,11 +136,11 @@ CREATE TABLE Product
 (	id 			INT IDENTITY 		PRIMARY KEY,
 	sup_id		INT,
 	category_id	INT,
-	name		VARCHAR(20)	 	NOT NULL,
+	name		NVARCHAR(20)	 	NOT NULL,
 	price		INT 			NOT NULL,
-	size		VARCHAR(20),
-	color		VARCHAR(20),
-	material	VARCHAR(20),
+	size		NVARCHAR(20),
+	color		NVARCHAR(20),
+	material	NVARCHAR(20),
 	quantity	INT,
 	CONSTRAINT 	fk_pro_supplier		FOREIGN KEY (sup_id)			
 				REFERENCES Supplier(id),
@@ -183,9 +183,9 @@ CREATE TABLE Bill
 	issue_time		DATETIME,
 	dlvr_time		DATETIME,
 	dlvr_fee		INT,
-	dlvr_address_street		VARCHAR(50),
-	dlvr_address_district	VARCHAR(50),
-	dlvr_address_city		VARCHAR(50),
+	dlvr_address_street		NVARCHAR(50),
+	dlvr_address_district	NVARCHAR(50),
+	dlvr_address_city		NVARCHAR(50),
 	CONSTRAINT		fk_bill_order 		FOREIGN KEY (order_id)
 					REFERENCES Orders(id),
 					--ON DELETE CASCADE,
@@ -199,7 +199,7 @@ CREATE TABLE Promotion
 	end_time	DATETIME,
 	promo_type	CHAR(1),
 	promo_value INT,
-	descr 		VARCHAR(50)
+	descr 		NVARCHAR(50)
 );
 CREATE TABLE Promotion_Product
 (	promo_id		INT,
@@ -216,7 +216,7 @@ CREATE TABLE Promotion_Product
 CREATE TABLE Customer
 (	
 	id 			INT IDENTITY 	PRIMARY KEY,
-	name		VARCHAR(20) 	NOT NULL
+	name		NVARCHAR(20) 	NOT NULL
 );
 CREATE TABLE Customer_Email
 (	cus_id		INT 			NOT NULL,
@@ -229,9 +229,9 @@ CREATE TABLE Customer_Email
 CREATE TABLE Customer_Address
 (	
 	cus_id				INT 		 NOT NULL,
-	address_street		VARCHAR(255) NOT NULL,
-	address_district	VARCHAR(255) NOT NULL,
-	address_city		VARCHAR(255) NOT NULL,
+	address_street		NVARCHAR(255) NOT NULL,
+	address_district	NVARCHAR(255) NOT NULL,
+	address_city		NVARCHAR(255) NOT NULL,
 	CONSTRAINT	pk_cus_address	PRIMARY KEY (cus_id, address_street, address_district, address_city),
 	CONSTRAINT	fk_cus_address	FOREIGN KEY (cus_id)
 				REFERENCES		Customer(id)
@@ -248,8 +248,8 @@ CREATE TABLE Customer_Phone
 );
 CREATE TABLE Membership_Level
 (	
-	level			VARCHAR(10)	PRIMARY KEY,
-	benefit			VARCHAR(20),
+	level			NVARCHAR(10)	PRIMARY KEY,
+	benefit			NVARCHAR(20),
 	min_point		INT			NOT NULL,	
 	max_point		INT			NOT NULL,
 	discount_amount	INT			NOT NULL
@@ -260,7 +260,7 @@ CREATE TABLE Membership_Card
 	cus_id				INT			NOT NULL,
 	card_point			INT			NOT NULL,
 	registration_date	DATE,	
-	card_level			VARCHAR(10)	NOT NULL
+	card_level			NVARCHAR(10)	NOT NULL
 	CONSTRAINT			fk_memcard_cus		FOREIGN KEY (cus_id)
 						REFERENCES			Customer(id)
 						ON DELETE CASCADE,
@@ -273,7 +273,7 @@ CREATE TABLE Review
 	cus_id			INT			NOT NULL,
 	pro_id			INT			NOT NULL,
 	time			DATETIME	NOT NULL,
-	content			VARCHAR(255) NOT NULL,
+	content			NVARCHAR(255) NOT NULL,
 	rating			INT			NOT NULL,
 	CONSTRAINT		fk_review_cus	FOREIGN KEY (cus_id)
 					REFERENCES		Customer(id),
