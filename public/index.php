@@ -7,7 +7,8 @@ require __DIR__ . '/../src/bootstrap.php';
 <?php view('header', 
     [
         'title' => 'Welcome',
-        'style' => 'index.css'
+        'style' => 'index.css',
+        'script' => 'index.js'
     ]
 ) 
 ?>

@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://www.phptutorial.net/app/css/style.css">
     <title><?= $title ?? 'Home' ?></title>
     <link rel="stylesheet" href=<?= 'css/' . ($style ?? 'index.css') ?>>
+    <script defer src=<?= 'js/' . ($script ?? 'index.js')  ?>></script>
 </head>
 <body>
 <main>
