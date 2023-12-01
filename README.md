@@ -26,6 +26,24 @@ An online clothing store web application made for the Database Systems course of
 
 Xử lý form trong PHP xem thêm tại: https://www.phptutorial.net/php-tutorial/php-registration-form/
 
+### Cập nhật Keep It Simple
+
+
+Xóa các thư mục `public`, `src`, `.htaccess`, `database` -> `sql`
+
+Các page được hiện thực trực tiếp trên root folder:
+
+| Page | Description |
+|-|-|
+| `index.php` | Trang chủ, link tới 4 trang còn lại |
+| `product.php` | Trang sản phẩm |
+| `cart.php` | Giỏ hàng (có thể để chung vào `product.php` nếu có thể) |
+| `bill.php` | Quản lý hóa đơn |
+| `employee.php` | Quản lý nhân viên |
+| `stat.php` | Trang thống kê |
+
+Các file CSS, JavaScript được gom vào các thư mục `css` và `js`.
+
 ## Hướng dẫn kết nối PHP - SQL Server
 
 Cài đặt:
@@ -60,3 +78,8 @@ Xem thêm về PHP: [PHP Tutorial](https://www.phptutorial.net/)
 
 Xem thêm về PHP PDO - thư viện kết nối CSDL: [PHP PDO Tutorial](https://www.phptutorial.net/php-pdo/)
 
+### Cập nhật MySQL: 
+
+- Kết nối PHP - MySQL: xem trong PHP tutorial ở các trang tutorial trên
+
+- Xem thêm về MySQL: [MySQL Tutorial](https://www.mysqltutorial.org/)
