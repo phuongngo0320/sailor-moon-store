@@ -36,31 +36,34 @@ DROP TRIGGER IF EXISTS order_stock_quantity;
 -- 	END
 -- END
 
-DELIMITER $$ 
-CREATE TRIGGER supervisor_salary 
-	AFTER INSERT, UPDATE ON Employee 
-	FOR EACH ROW 
-IF EXISTS (
-	SELECT * 
-	FROM NEW  
-		JOIN Employee AS E ON NEW.supervisor_id = E.id
-	WHERE (NEW.supervisor_id IS NOT NULL) AND (NEW.salary > E.salary)
-) 
-THEN 
-	SIGNAL SQLSTATE '45000';
-	SET MESSAGE_TEXT = 'Supervisor salary must be higher than the employee''s salary.';
-	ROLLBACK;
-ELSEIF (
-	SELECT * 
-	FROM NEW 
-		JOIN Employee ON NEW.id = E.supervisor_id
-	WHERE (E.supervisor_id IS NOT NULL) AND (E.salary > NEW.salary)
-)
-THEN 
-	SIGNAL SQLSTATE '45000';
-	SET MESSAGE_TEXT = 'Supervisor salary must be higher than the employee''s salary.';
-	ROLLBACK;
-END IF;
+DELIMITER $$
+CREATE TRIGGER supervisor_salary
+BEFORE INSERT, UPDATE ON Employee
+FOR EACH ROW
+BEGIN
+    DECLARE supervisor_salary INT;
+    DECLARE employee_salary INT;
+
+    IF NEW.supervisor_id IS NOT NULL THEN
+        SELECT salary INTO supervisor_salary FROM Employee WHERE id = NEW.supervisor_id;
+        SELECT salary INTO employee_salary FROM Employee WHERE id = NEW.id;
+
+        IF supervisor_salary <= employee_salary THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Supervisor salary must be higher than the employee''s salary.';
+        END IF;
+    END IF;
+
+    IF EXISTS (
+		SELECT 1 
+		FROM Employee 
+		WHERE supervisor_id = NEW.id AND salary >= NEW.salary
+	) 
+	THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Supervisor salary must be higher than the employee''s salary.';
+    END IF;
+END $$
 DELIMITER ;
 
 -- GO 
@@ -83,21 +86,41 @@ DELIMITER ;
 -- END
 
 DELIMITER $$ 
-CREATE TRIGGER review_product 
-	AFTER INSERT, UPDATE ON Review 
+CREATE TRIGGER review_product_insert
+	BEFORE INSERT ON Review
 	FOR EACH ROW
-IF NOT EXISTS (
-	SELECT * 
-	FROM Bill AS B 
-		JOIN Orders AS O ON B.order_id = O.id
-		JOIN Order_Detail AS OD ON OD.order_id = O.id 
-		JOIN NEW ON NEW.pro_id = OD.product_id
-)
-THEN 
-	SIGNAL SQLSTATE '45000';
-	SET MESSAGE_TEXT = 'Customers cannot write a review on a product before purchasing it';
-	ROLLBACK;
-END IF;
+BEGIN
+	IF NOT EXISTS (
+		SELECT * 
+		FROM Bill AS B 
+			JOIN Orders AS O ON B.order_id = O.id
+			JOIN Order_Detail AS OD ON OD.order_id = O.id 
+			JOIN NEW ON NEW.pro_id = OD.product_id
+	)
+	THEN 
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'Customers cannot write a review on a product before purchasing it';
+	END IF;
+END $$
+DELIMITER ;
+
+DELIMITER $$ 
+CREATE TRIGGER review_product_update
+	BEFORE UPDATE ON Review
+	FOR EACH ROW
+BEGIN
+	IF NOT EXISTS (
+		SELECT * 
+		FROM Bill AS B 
+			JOIN Orders AS O ON B.order_id = O.id
+			JOIN Order_Detail AS OD ON OD.order_id = O.id 
+			JOIN NEW ON NEW.pro_id = OD.product_id
+	)
+	THEN 
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'Customers cannot write a review on a product before purchasing it';
+	END IF;
+END $$
 DELIMITER ;
 
 -- GO
@@ -119,17 +142,37 @@ DELIMITER ;
 -- END
 
 DELIMITER $$
-CREATE TRIGGER order_stock_quantity 
-	AFTER INSERT, UPDATE ON Order_Detail
+CREATE TRIGGER order_stock_quantity_insert
+	BEFORE INSERT ON Order_Detail
 	FOR EACH ROW 
-IF EXISTS (
-	SELECT *
-	FROM NEW 
-		JOIN Product AS P ON NEW.product_id = P.id
-	WHERE NEW.quantity > P.quantity
-)
-THEN 
-	SIGNAL SQLSTATE '45000';
-	SET MESSAGE_TEXT = 'Quantity of a product in an order must not exceed its stock quantity';
-	ROLLBACK;
+BEGIN
+	IF EXISTS (
+		SELECT *
+		FROM NEW 
+			JOIN Product AS P ON NEW.product_id = P.id
+		WHERE NEW.quantity > P.quantity
+	)
+	THEN 
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'Quantity of a product in an order must not exceed its stock quantity';
+	END IF;
+END $$
+DELIMITER ;
+
+DELIMITER $$
+CREATE TRIGGER order_stock_quantity_update
+	BEFORE UPDATE ON Order_Detail
+	FOR EACH ROW 
+BEGIN
+	IF EXISTS (
+		SELECT *
+		FROM NEW 
+			JOIN Product AS P ON NEW.product_id = P.id
+		WHERE NEW.quantity > P.quantity
+	)
+	THEN 
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'Quantity of a product in an order must not exceed its stock quantity';
+	END IF;
+END $$
 DELIMITER ;
