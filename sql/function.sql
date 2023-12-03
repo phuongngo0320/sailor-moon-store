@@ -1,29 +1,36 @@
 DELIMITER $$ 
-
 CREATE FUNCTION BranchRevenue(
     branch_no INT,
     year_ INT
 )
 RETURNS INT 
 BEGIN 
-    DECLARE totalRevenue INT;
+    DECLARE sum_order_price INT;
+    DECLARE sum_dlvr_fee INT; 
 
-    SELECT 
-        SUM(Bill.dlvr_fee) + 
-        SUM(OD.unit_price * OD.quantity * (100 - OD.promo_amount) / 100) 
-    INTO totalRevenue
+    SELECT SUM(OD.unit_price * OD.quantity * (100 - OD.promo_amount) / 100)
+    INTO sum_order_price 
     FROM Bill
         JOIN Orders AS O ON O.id = Bill.order_id
         JOIN Order_Detail AS OD ON OD.order_id = O.id
         JOIN Product AS P ON OD.product_id = P.id 
-        JOIN Branch AS B ON O.branch_no = B.id 
+        JOIN Branch AS B ON O.branch_no = B.number 
     WHERE 
         DATE(Bill.issue_time) >= MAKEDATE(year_, 1) AND 
         DATE(Bill.issue_time) < MAKEDATE(year_ + 1, 1) AND 
         B.number = branch_no;
 
-    RETURN totalRevenue;
+    SELECT SUM(Bill.dlvr_fee)
+    INTO sum_dlvr_fee
+    FROM Bill
+        JOIN Orders AS O ON O.id = Bill.order_id
+        JOIN Branch AS B ON O.branch_no = B.number 
+    WHERE 
+        DATE(Bill.issue_time) >= MAKEDATE(year_, 1) AND 
+        DATE(Bill.issue_time) < MAKEDATE(year_ + 1, 1) AND 
+        B.number = branch_no;
 
+    RETURN sum_order_price + sum_dlvr_fee;
 END $$
 DELIMITER ;
 
