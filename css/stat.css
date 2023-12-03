@@ -30,7 +30,7 @@ textarea {
     box-sizing: border-box;
     width: 100%;
     padding: 5px;
-    height: 30px;
+    /* height: 30px; */
 }
 
 /* uniform shadow and rounded corners */
@@ -134,6 +134,17 @@ main .card {
 
 main .figure {
     font-size: xx-large;
+}
+
+main .input-year {
+    min-width: 25rem;
+    display: flex; 
+    gap: 1rem;
+    padding: 2rem;
+}
+
+main .input-year label {
+    text-align: right;
 }
 
 footer {

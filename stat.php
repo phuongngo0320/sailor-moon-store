@@ -1,3 +1,70 @@
+<?php 
+
+session_start();
+const DB_HOST = 'localhost:3307';
+const DB_NAME = 'sailormoonstore';
+const DB_USER = 'root';
+const DB_PASSWORD = '';
+
+function connect() {
+    static $pdo;
+
+    if (!$pdo) {
+        $pdo = new PDO(
+            sprintf("mysql:host=%s;dbname=%s;charset=UTF8", DB_HOST, DB_NAME),
+            DB_USER,
+            DB_PASSWORD,
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+    }
+    
+    return $pdo;
+}
+
+function getAllBranch() {
+    $pdo = connect();
+    $sql = "SELECT * FROM Branch";
+    $statement = $pdo->prepare($sql);
+    $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+    return $result;
+}
+
+// revenue
+function getBranchRevenue($bnum, $year) {
+    $pdo = connect();
+    $sql = "SELECT BranchRevenue(:bnum, :year) AS revenue";
+    $statement = $pdo->prepare($sql);
+    $statement->bindParam(":bnum", $bnum, PDO::PARAM_INT);
+    $statement->bindParam(":year", $year, PDO::PARAM_INT);
+    $result = $statement->fetch(PDO::FETCH_ASSOC);
+    return $result['revenue'];
+}
+
+function getBranchAverageRating($bnum, $year) {
+    $pdo = connect();
+    $sql = "SELECT BranchAverageRating(:bnum, :year) AS avgRating";
+    $statement = $pdo->prepare($sql);
+    $statement->bindParam(":bnum", $bnum, PDO::PARAM_INT);
+    $statement->bindParam(":year", $year, PDO::PARAM_INT);
+    $result = $statement->fetch(PDO::FETCH_ASSOC);
+    return $result['avgRating'];
+}
+
+//------------------------------------------------------------------
+$branches = getAllBranch();
+const START_YEAR = 2003;
+$current_year = date('Y');
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input_year = filter_input(INPUT_POST, 'year', FILTER_SANITIZE_NUMBER_INT);
+    $_SESSION['year'] = $input_year;
+    header('Location: stat.php');
+} else {
+    $input_year = $_SESSION['year'] ?? $current_year;
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -18,9 +85,11 @@
         integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+    <!-- JQuery -->
+    <script defer type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
     <!-- CSS & JS -->
     <link rel="stylesheet" href="css/stat.css">
-    <script defer src="js/stat.js"></script>
 </head>
 
 <body>
@@ -55,35 +124,46 @@
         </nav>
     </header>
     <main>
-        <h1>Statistics</h1>
+        <h1>Statistics in <?= $input_year ?></h1>
 
-
-
+        <form class="input-year" action="stat.php" method="post">
+            <label for="year">Select a year</label>
+            <select name="year" id="year">
+                <?php for($i = START_YEAR; $i <= $current_year; $i++): ?>
+                    <option 
+                        value="<?php echo $i ?>" 
+                        <?php echo ($i == $input_year) ? 'selected': ''; ?>
+                    >
+                        <?php echo $i ?>
+                    </option>
+                <?php endfor ?>
+            </select>
+            <button type="submit">OK</button>
+        </form>
 
         <div class="row stat-list">
-
-
+            <?php for ($i=0; $i < count($branches); $i++):?>
+                
             <div class="col-sm-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Chi nhánh Hà Nội</h5>
-                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-
-
+                        <h5 class="card-title">Chi nhánh <?= $branches[$i]['name'] ?></h5>
+                        <p class="card-text">This branch has an area of <?= $branches[$i]['area'] ?></p>
+                        
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="card">
                                     <div class="card-body">
                                         <h6 class="card-title">Total Revenue</h6>
 
-                                        <p class="figure">1000</p>
+                                        <p class="figure"><?= getBranchRevenue($i, $input_year)  ?></p>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-6">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h6 class="card-title">Average Rating</h6>
+                                        <h6 class="card-title"><?= getBranchAverageRating($i, $input_year) ?></h6>
                                         <p class="figure">4.7</p>
                                     </div>
                                 </div>
@@ -93,104 +173,31 @@
                 </div>
             </div>
 
-            <div class="col-sm-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Chi nhánh Hà Nội</h5>
-                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-
-
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Total Revenue</h6>
-
-                                        <p class="figure">1000</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Average Rating</h6>
-                                        <p class="figure">4.7</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-sm-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Chi nhánh Hà Nội</h5>
-                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-
-
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Total Revenue</h6>
-
-                                        <p class="figure">1000</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Average Rating</h6>
-                                        <p class="figure">4.7</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-sm-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Chi nhánh Hà Nội</h5>
-                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-
-
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Total Revenue</h6>
-
-                                        <p class="figure">1000</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Average Rating</h6>
-                                        <p class="figure">4.7</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+            <?php endfor ?>
         </div>
-
-
-
     </main>
     <footer>
         <p>2023 No Copyright by Sailor Moon Team HCMUT</p>
     </footer>
+    <!-- <script>
+        $(document).ready(function () {
+            $(document).delegate('#year', 'change', function() {
+                $.ajax({
+                    type: 'GET',
+                    contentType: 'application/json;charset=UTF-8',
+                    url: 'http://localhost/projects/sailor-moon-store/stat.php',
+                    data: JSON.stringify({
+                        'year': $('#year').val()
+                    }),
+                    success: function(result) {
+                        console.log('update change successfully');
+                    },
+                    error: function(error) {
+                        alert(error);
+                    }
+                });
+            });
+        });
+    </script> -->
 </body>
-
 </html>
