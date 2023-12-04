@@ -25,6 +25,7 @@ function getAllBranch() {
     $pdo = connect();
     $sql = "SELECT * FROM Branch";
     $statement = $pdo->prepare($sql);
+    $statement->execute();
     $result = $statement->fetchAll(PDO::FETCH_ASSOC);
     return $result;
 }
@@ -36,6 +37,7 @@ function getBranchRevenue($bnum, $year) {
     $statement = $pdo->prepare($sql);
     $statement->bindParam(":bnum", $bnum, PDO::PARAM_INT);
     $statement->bindParam(":year", $year, PDO::PARAM_INT);
+    $statement->execute();
     $result = $statement->fetch(PDO::FETCH_ASSOC);
     return $result['revenue'];
 }
@@ -46,6 +48,7 @@ function getBranchAverageRating($bnum, $year) {
     $statement = $pdo->prepare($sql);
     $statement->bindParam(":bnum", $bnum, PDO::PARAM_INT);
     $statement->bindParam(":year", $year, PDO::PARAM_INT);
+    $statement->execute();
     $result = $statement->fetch(PDO::FETCH_ASSOC);
     return $result['avgRating'];
 }
@@ -148,23 +151,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Chi nhánh <?= $branches[$i]['name'] ?></h5>
+
+                        <?php if (isset($branches[$i]['area'])): ?>
                         <p class="card-text">This branch has an area of <?= $branches[$i]['area'] ?></p>
-                        
+                        <?php endif ?>
+
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="card">
                                     <div class="card-body">
                                         <h6 class="card-title">Total Revenue</h6>
 
-                                        <p class="figure"><?= getBranchRevenue($i, $input_year)  ?></p>
+                                        <p class="figure"><?= getBranchRevenue($i, $input_year) ?? 'N/A' ?></p>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-6">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h6 class="card-title"><?= getBranchAverageRating($i, $input_year) ?></h6>
-                                        <p class="figure">4.7</p>
+                                        <h6 class="card-title">Average Rating</h6>
+                                        <p class="figure"><?= getBranchAverageRating($i, $input_year) ?? 'N/A' ?></p>
                                     </div>
                                 </div>
                             </div>
