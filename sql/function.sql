@@ -1,5 +1,6 @@
 DELIMITER $$ 
 CREATE FUNCTION BranchRevenue(
+    region_id INT,
     branch_no INT,
     year_ INT
 )
@@ -18,7 +19,8 @@ BEGIN
     WHERE 
         DATE(Bill.issue_time) >= MAKEDATE(year_, 1) AND 
         DATE(Bill.issue_time) < MAKEDATE(year_ + 1, 1) AND 
-        B.number = branch_no;
+        B.number = branch_no AND 
+        B.region_id = region_id;
 
     SELECT SUM(Bill.dlvr_fee)
     INTO sum_dlvr_fee
@@ -28,7 +30,8 @@ BEGIN
     WHERE 
         DATE(Bill.issue_time) >= MAKEDATE(year_, 1) AND 
         DATE(Bill.issue_time) < MAKEDATE(year_ + 1, 1) AND 
-        B.number = branch_no;
+        B.number = branch_no AND 
+        B.region_id = region_id;
 
     RETURN sum_order_price + sum_dlvr_fee;
 END $$
@@ -36,6 +39,7 @@ DELIMITER ;
 
 DELIMITER $$
 CREATE FUNCTION BranchAverageRating(
+    region_id INT,
     branch_no INT,
     year_ INT
 ) 
@@ -52,7 +56,8 @@ BEGIN
     WHERE 
         DATE(R.time) >= MAKEDATE(year_, 1) AND 
         DATE(R.time) < MAKEDATE(year_ + 1, 1) AND 
-        B.number = branch_no;
+        B.number = branch_no AND 
+        B.region_id = region_id;
 
     RETURN (avgRating);
 END $$ 

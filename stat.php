@@ -31,10 +31,11 @@ function getAllBranch() {
 }
 
 // revenue
-function getBranchRevenue($bnum, $year) {
+function getBranchRevenue($regid, $bnum, $year) {
     $pdo = connect();
-    $sql = "SELECT BranchRevenue(:bnum, :year) AS revenue";
+    $sql = "SELECT BranchRevenue(:regid , :bnum, :year) AS revenue";
     $statement = $pdo->prepare($sql);
+    $statement->bindParam(":regid", $regid, PDO::PARAM_INT);
     $statement->bindParam(":bnum", $bnum, PDO::PARAM_INT);
     $statement->bindParam(":year", $year, PDO::PARAM_INT);
     $statement->execute();
@@ -42,10 +43,11 @@ function getBranchRevenue($bnum, $year) {
     return $result['revenue'];
 }
 
-function getBranchAverageRating($bnum, $year) {
+function getBranchAverageRating($regid, $bnum, $year) {
     $pdo = connect();
-    $sql = "SELECT BranchAverageRating(:bnum, :year) AS avgRating";
+    $sql = "SELECT BranchAverageRating(:regid, :bnum, :year) AS avgRating";
     $statement = $pdo->prepare($sql);
+    $statement->bindParam(":regid", $regid, PDO::PARAM_INT);
     $statement->bindParam(":bnum", $bnum, PDO::PARAM_INT);
     $statement->bindParam(":year", $year, PDO::PARAM_INT);
     $statement->execute();
@@ -145,15 +147,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
 
         <div class="row stat-list">
-            <?php for ($i=0; $i < count($branches); $i++):?>
-                
+            <?php foreach ($branches as $index => $branch): ?>
             <div class="col-sm-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Chi nhánh <?= $branches[$i]['name'] ?></h5>
+                        <h5 class="card-title">Chi nhánh <?= $branch['name'] ?></h5>
 
-                        <?php if (isset($branches[$i]['area'])): ?>
-                        <p class="card-text">This branch has an area of <?= $branches[$i]['area'] ?></p>
+                        <?php if (isset($branch['area'])): ?>
+                        <p class="card-text">This branch has an area of <?= $branch['area'] ?></p>
                         <?php endif ?>
 
                         <div class="row">
@@ -162,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <div class="card-body">
                                         <h6 class="card-title">Total Revenue</h6>
 
-                                        <p class="figure"><?= getBranchRevenue($i, $input_year) ?? 'N/A' ?></p>
+                                        <p class="figure"><?= getBranchRevenue($branch['region_id'], $branch['number'], $input_year) ?? 'N/A' ?></p>
                                     </div>
                                 </div>
                             </div>
@@ -170,7 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="card">
                                     <div class="card-body">
                                         <h6 class="card-title">Average Rating</h6>
-                                        <p class="figure"><?= getBranchAverageRating($i, $input_year) ?? 'N/A' ?></p>
+                                        <p class="figure"><?= getBranchAverageRating($branch['region_id'], $branch['number'], $input_year) ?? 'N/A' ?></p>
                                     </div>
                                 </div>
                             </div>
@@ -179,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
 
-            <?php endfor ?>
+            <?php endforeach ?>
         </div>
     </main>
     <footer>
