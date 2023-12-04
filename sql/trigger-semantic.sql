@@ -95,7 +95,7 @@ BEGIN
 		FROM Bill AS B 
 			JOIN Orders AS O ON B.order_id = O.id
 			JOIN Order_Detail AS OD ON OD.order_id = O.id 
-			JOIN NEW ON NEW.pro_id = OD.product_id
+		WHERE NEW.pro_id = OD.product_id
 	)
 	THEN 
 		SIGNAL SQLSTATE '45000'
@@ -114,7 +114,7 @@ BEGIN
 		FROM Bill AS B 
 			JOIN Orders AS O ON B.order_id = O.id
 			JOIN Order_Detail AS OD ON OD.order_id = O.id 
-			JOIN NEW ON NEW.pro_id = OD.product_id
+		WHERE NEW.pro_id = OD.product_id
 	)
 	THEN 
 		SIGNAL SQLSTATE '45000'
@@ -148,9 +148,8 @@ CREATE TRIGGER order_stock_quantity_insert
 BEGIN
 	IF EXISTS (
 		SELECT *
-		FROM NEW 
-			JOIN Product AS P ON NEW.product_id = P.id
-		WHERE NEW.quantity > P.quantity
+		FROM Product AS P
+		WHERE NEW.product_id = P.id AND NEW.quantity > P.quantity
 	)
 	THEN 
 		SIGNAL SQLSTATE '45000'
@@ -166,9 +165,8 @@ CREATE TRIGGER order_stock_quantity_update
 BEGIN
 	IF EXISTS (
 		SELECT *
-		FROM NEW 
-			JOIN Product AS P ON NEW.product_id = P.id
-		WHERE NEW.quantity > P.quantity
+		FROM Product AS P
+		WHERE NEW.product_id = P.id AND NEW.quantity > P.quantity
 	)
 	THEN 
 		SIGNAL SQLSTATE '45000'
