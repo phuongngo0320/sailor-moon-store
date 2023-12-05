@@ -57,7 +57,7 @@
                         <div class="clear"></div>
                         <div class="filter_sort">
                             <select name="sort1" id="sort1">
-                                <option value="">Sắp xếp</option>
+                                <option value="NULL">Sắp xếp</option>
                                 <option value="Customer_id ASC">Mã khách hàng tăng dần</option>
                                 <option value="Customer_id DESC">Mã khách hàng giảm dần</option>
                                 <option value="Customer_name ASC">Tên khách hàng tăng dần</option>
@@ -142,7 +142,7 @@
                         </div>
                         <div class="filter_sort">
                             <select name="sort" id="sort">
-                                <option value="">Sắp xếp</option>
+                                <option value="NULL">Sắp xếp</option>
                                 <option value="Region_id ASC, Branch_number ASC">Chi nhánh tăng dần</option>
                                 <option value="Region_id DESC, Branch_number DESC">Chi nhánh giảm dần</option>
                                 <option value="Employee_id ASC">Mã nhân viên tăng dần</option>
