@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Sailor Moon Store Online</title>
+    <title>Bach</title>
 </head>
 <body>  
     <div class="wrapper">
         
         <?php
+        // mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $conn = new mysqli("localhost","root","","sailormoonstore");
 
         if($conn->connect_error) {
@@ -32,6 +33,48 @@
         <div class="clear"></div>
 
         <div class="main">
+
+            <?php
+                function getEmployeeList($conn,$month,$year,$selectedOption) {
+                    if($month) {
+                        $nhanvien =  " SELECT Branch.region_id AS Region_id,Branch.number AS Branch_number,Employee.id AS Employee_id,Employee.name AS Employee_name,COUNT(Orders.id) AS Amount
+                                            FROM ((Salesman JOIN Employee ON Salesman.salesman_id = Employee.id) JOIN Orders ON Salesman.salesman_id = Orders.salesman_id) JOIN Branch ON (Employee.region_id = Branch.region_id AND Employee.branch_no = Branch.number) 
+                                            WHERE month(orders.order_time) = $month AND year(orders.order_time) = $year
+                                            GROUP BY Employee.id,Employee.name
+                                            HAVING (Branch.region_id,Branch.number,COUNT(Orders.id)) IN (SELECT total.region_id,total.number,MAX(total.num) AS max 
+                                                                                                        FROM  (SELECT Branch.region_id,Branch.number,Employee.id,COUNT(Orders.id) AS num 
+                                                                                                                FROM ((Salesman JOIN Employee ON Salesman.salesman_id = Employee.id) JOIN Orders ON Salesman.salesman_id = Orders.salesman_id) JOIN Branch ON (Employee.region_id = Branch.region_id AND Employee.branch_no = Branch.number)  
+                                                                                                                WHERE month(orders.order_time) = $month AND year(orders.order_time) = $year
+                                                                                                                GROUP BY Employee.id) AS total 
+                                                                                                        GROUP BY total.region_id,total.number) 
+                                            ORDER BY $selectedOption; ";   
+                    }
+                    else {
+                        $nhanvien =  "SELECT Branch.region_id AS Region_id,Branch.number AS Branch_number,Employee.id AS Employee_id,Employee.name AS Employee_name,COUNT(Orders.id) AS Amount
+                                            FROM ((Salesman JOIN Employee ON Salesman.salesman_id = Employee.id) JOIN Orders ON Salesman.salesman_id = Orders.salesman_id) JOIN Branch ON (Employee.region_id = Branch.region_id AND Employee.branch_no = Branch.number) 
+                                            WHERE year(orders.order_time) = $year
+                                            GROUP BY Employee.id,Employee.name
+                                            HAVING (Branch.region_id,Branch.number,COUNT(Orders.id)) IN (SELECT total.region_id,total.number,MAX(total.num) AS max 
+                                                                                                        FROM  (SELECT Branch.region_id,Branch.number,Employee.id,COUNT(Orders.id) AS num 
+                                                                                                                FROM ((Salesman JOIN Employee ON Salesman.salesman_id = Employee.id) JOIN Orders ON Salesman.salesman_id = Orders.salesman_id) JOIN Branch ON (Employee.region_id = Branch.region_id AND Employee.branch_no = Branch.number)  
+                                                                                                                WHERE year(orders.order_time) = $year
+                                                                                                                GROUP BY Employee.id) AS total 
+                                                                                                        GROUP BY total.region_id,total.number ) 
+                                            ORDER BY $selectedOption; ";  
+                    }
+                return   mysqli_query($conn,$nhanvien);
+                }
+                function getCustomerList($conn,$tensp,$start,$end,$FindOption) {
+                    $sql_timkiem = "SELECT Customer.id AS Customer_id, Customer.name AS Customer_name, COUNT(Product.id) AS Amount
+                                    FROM	Customer, Orders, Order_Detail, Product
+                                    WHERE	Customer.id = Orders.cus_id AND Orders.id = Order_Detail.order_id AND Order_Detail.product_id = Product.id  AND product.name = '$tensp' AND orders.order_time >='$start' AND orders.order_time <= '$end'
+                                    GROUP BY Customer.id, Customer.name
+                                    ORDER BY $FindOption";
+                    return mysqli_query($conn,$sql_timkiem);
+                }
+            ?>
+
+
             <?php
             if(isset($_GET['action'])){
                 $tam = $_GET['action'];
@@ -57,7 +100,7 @@
                         <div class="clear"></div>
                         <div class="filter_sort">
                             <select name="sort1" id="sort1">
-                                <option value="NULL">Sắp xếp</option>
+                                <option value="Customer_id ASC">Sắp xếp</option>
                                 <option value="Customer_id ASC">Mã khách hàng tăng dần</option>
                                 <option value="Customer_id DESC">Mã khách hàng giảm dần</option>
                                 <option value="Customer_name ASC">Tên khách hàng tăng dần</option>
@@ -84,13 +127,12 @@
                     <p> Mời nhập đầy đủ thông tin </p>
                     <?php
                         }
+                        elseif ($start > $end){
+                            ?>  
+                            <p> Mời nhập chính xác thông tin </p>
+                            <?php
+                                }
                         else {
-                        $sql_timkiem = "SELECT Customer.id AS Customer_id, Customer.name AS Customer_name, COUNT(Product.id) AS Amount
-                                        FROM	Customer, Orders, Order_Detail, Product
-                                        WHERE	Customer.id = Orders.cus_id AND Orders.id = Order_Detail.order_id AND Order_Detail.product_id = Product.id  AND product.name = '$tensp' AND orders.order_time >='$start' AND orders.order_time <= '$end'
-                                        GROUP BY Customer.id, Customer.name
-                                        ORDER BY $FindOption;";
-                        $query_lietke = mysqli_query($conn,$sql_timkiem);
 
                     ?> 
                     <p>Liệt kê khách hàng</p>
@@ -104,8 +146,9 @@
                         </thead>
                         <tbody>
                         <?php
+                        $query= getCustomerList($conn, $tensp, $start, $end, $FindOption);
                         $i=0;
-                        while($row = mysqli_fetch_array($query_lietke)){
+                        while($row = mysqli_fetch_array($query)){
                             $i++;
                         ?>
                         <tr>
@@ -142,7 +185,7 @@
                         </div>
                         <div class="filter_sort">
                             <select name="sort" id="sort">
-                                <option value="NULL">Sắp xếp</option>
+                                <option value="Region_id ASC, Branch_number ASC">Sắp xếp</option>
                                 <option value="Region_id ASC, Branch_number ASC">Chi nhánh tăng dần</option>
                                 <option value="Region_id DESC, Branch_number DESC">Chi nhánh giảm dần</option>
                                 <option value="Employee_id ASC">Mã nhân viên tăng dần</option>
@@ -157,7 +200,6 @@
                         <input type="submit" value="Chọn" name="chon" style="font-weight:bolder; margin-bottom: 10px;font-size:120%">
                     
                     </form>
-
 
                 </div>
 
@@ -176,46 +218,16 @@
                             if($month>=1 AND $month<=12) {
                     ?>
                     <p>Nhân viên xuất sắc nhất từng chi nhánh trong tháng <?php echo $month ?> năm <?php echo $year ?> </p>
-                    
-
-
-                        
-
-                    <div class="clear"></div>
-                    
-
-
-
+                
                     <?php            
-                                $nhanvien =  "SELECT Branch.region_id AS Region_id,Branch.number AS Branch_number,Employee.id AS Employee_id,Employee.name AS Employee_name,COUNT(Orders.id) AS Amount
-                                            FROM ((Salesman JOIN Employee ON Salesman.salesman_id = Employee.id) JOIN Orders ON Salesman.salesman_id = Orders.salesman_id) JOIN Branch ON (Employee.region_id = Branch.region_id AND Employee.branch_no = Branch.number) 
-                                            WHERE month(orders.order_time) = $month AND year(orders.order_time) = $year
-                                            GROUP BY Employee.id,Employee.name
-                                            HAVING (Branch.region_id,Branch.number,COUNT(Orders.id)) IN (SELECT total.region_id,total.number,MAX(total.num) AS max 
-                                                                                                        FROM  (SELECT Branch.region_id,Branch.number,Employee.id,COUNT(Orders.id) AS num 
-                                                                                                                FROM ((Salesman JOIN Employee ON Salesman.salesman_id = Employee.id) JOIN Orders ON Salesman.salesman_id = Orders.salesman_id) JOIN Branch ON (Employee.region_id = Branch.region_id AND Employee.branch_no = Branch.number)  
-                                                                                                                WHERE month(orders.order_time) = $month AND year(orders.order_time) = $year
-                                                                                                                GROUP BY Employee.id) AS total 
-                                                                                                        GROUP BY total.region_id,total.number) 
-                                            ORDER BY $selectedOption; ";          
+                                       
                             }
                             elseif(!$month) {
                     ?>
                     <p> Nhân viên xuất sắc nhất từng chi nhánh trong năm <?php echo $year ?> </p>
                     <?php            
-                                $nhanvien =  "SELECT Branch.region_id AS Region_id,Branch.number AS Branch_number,Employee.id AS Employee_id,Employee.name AS Employee_name,COUNT(Orders.id) AS Amount
-                                            FROM ((Salesman JOIN Employee ON Salesman.salesman_id = Employee.id) JOIN Orders ON Salesman.salesman_id = Orders.salesman_id) JOIN Branch ON (Employee.region_id = Branch.region_id AND Employee.branch_no = Branch.number) 
-                                            WHERE year(orders.order_time) = $year
-                                            GROUP BY Employee.id,Employee.name
-                                            HAVING (Branch.region_id,Branch.number,COUNT(Orders.id)) IN (SELECT total.region_id,total.number,MAX(total.num) AS max 
-                                                                                                        FROM  (SELECT Branch.region_id,Branch.number,Employee.id,COUNT(Orders.id) AS num 
-                                                                                                                FROM ((Salesman JOIN Employee ON Salesman.salesman_id = Employee.id) JOIN Orders ON Salesman.salesman_id = Orders.salesman_id) JOIN Branch ON (Employee.region_id = Branch.region_id AND Employee.branch_no = Branch.number)  
-                                                                                                                WHERE year(orders.order_time) = $year
-                                                                                                                GROUP BY Employee.id) AS total 
-                                                                                                        GROUP BY total.region_id,total.number ) 
-                                            ORDER BY $selectedOption; ";    
+                                
                             }                      
-                            $query_lietkenv = mysqli_query($conn,$nhanvien);
                         ?>
                         <table class="content_table" border="1" width=100% style="border-collapse:collapse;">
                             <thead>
@@ -229,8 +241,9 @@
                             </thead>
                             <tbody>
                             <?php
+                            $query1=getEmployeeList($conn,$month,$year,$selectedOption);
                             $i=0;
-                            while($row1 = mysqli_fetch_array($query_lietkenv)){
+                            while($row1 = mysqli_fetch_array($query1)){
                                 $i++;
                             ?>
                             <tr>
