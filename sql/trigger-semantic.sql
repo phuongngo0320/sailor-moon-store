@@ -37,8 +37,38 @@ DROP TRIGGER IF EXISTS order_stock_quantity;
 -- END
 
 DELIMITER $$
-CREATE TRIGGER supervisor_salary
-BEFORE INSERT, UPDATE ON Employee
+CREATE TRIGGER supervisor_salary_insert
+BEFORE INSERT ON Employee
+FOR EACH ROW
+BEGIN
+    DECLARE supervisor_salary INT;
+    DECLARE employee_salary INT;
+
+    IF NEW.supervisor_id IS NOT NULL THEN
+        SELECT salary INTO supervisor_salary FROM Employee WHERE id = NEW.supervisor_id;
+        SELECT salary INTO employee_salary FROM Employee WHERE id = NEW.id;
+
+        IF supervisor_salary <= employee_salary THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Supervisor salary must be higher than the employee''s salary.';
+        END IF;
+    END IF;
+
+    IF EXISTS (
+		SELECT 1 
+		FROM Employee 
+		WHERE supervisor_id = NEW.id AND salary >= NEW.salary
+	) 
+	THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Supervisor salary must be higher than the employee''s salary.';
+    END IF;
+END $$
+DELIMITER ;
+
+DELIMITER $$
+CREATE TRIGGER supervisor_salary_update
+BEFORE UPDATE ON Employee
 FOR EACH ROW
 BEGIN
     DECLARE supervisor_salary INT;
