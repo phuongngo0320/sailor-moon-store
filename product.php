@@ -10,7 +10,7 @@
 	}
 ?>
 <?php
-                    $order_id = 12313;
+                    $order_id = 12231;
                 if (isset($_POST['id']) && isset($_POST['price'])){
                     $product_id = (int)$_POST['id'];
                     $product_price = (int)$_POST['price'];
@@ -107,6 +107,14 @@
     $result1 = $conn->query($sql1);
     $subTotal = 0;
     $discount = 0;
+    $sql3 = "
+    SELECT discount_amount FROM membership_level WHERE level=(
+        SELECT card_level FROM membership_card WHERE cus_id = (
+            SELECT cus_id FROM orders WHERE id = '$order_id'
+            )
+     );
+    ";
+    $discount_member = $conn->query($sql3)->fetch_assoc()["discount_amount"];
     if ($result1->num_rows > 0) {
         echo "
         <div class='orderWrapper'>
@@ -165,12 +173,16 @@
               <span class='SummaryItemPrice'>".$subTotal."VND</span>
           </div>
           <div class='SummaryItem'>
-              <span class='SummaryItemText'>Discount</span>
+              <span class='SummaryItemText'>Discount for product</span>
               <span class='SummaryItemPrice'>".$discount."  VND</span>
           </div>
           <div class='SummaryItem'>
+          <span class='SummaryItemText'>Discount for member</span>
+          <span class='SummaryItemPrice'>".$discount_member."  %</span>
+          </div>
+          <div class='SummaryItem'>
               <span class='SummaryItemText'><b>Total</b></span>
-              <span class='SummaryItemPrice'><b>".$subTotal-$discount."VND</b></span>
+              <span class='SummaryItemPrice'><b>".($subTotal-$discount)*(100-$discount_member)/100 ."VND</b></span>
           </div>
           <form method='POST'>
           <input type='hidden' id='payment' name='payment' value='Đang xử lý'>
