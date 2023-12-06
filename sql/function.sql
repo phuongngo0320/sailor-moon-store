@@ -9,6 +9,15 @@
 --     DECLARE sum_order_price INT;
 --     DECLARE sum_dlvr_fee INT; 
 
+--     IF NOT EXISTS (
+--         SELECT * 
+--         FROM Branch AS B 
+--         WHERE B.region_id = region_id AND B.number = branch_no
+--     ) THEN 
+--         SIGNAL SQLSTATE '45000'
+--         SET MESSAGE_TEXT = 'This branch does not exists';
+--     END IF;
+
 --     SELECT SUM(OD.unit_price * OD.quantity * (100 - OD.promo_amount) / 100)
 --     INTO sum_order_price 
 --     FROM Bill
@@ -46,6 +55,15 @@
 -- RETURNS DECIMAL(10,1)
 -- BEGIN 
 --     DECLARE avgRating DECIMAL(10, 1);
+
+--     IF NOT EXISTS (
+--         SELECT * 
+--         FROM Branch AS B 
+--         WHERE B.region_id = region_id AND B.number = branch_no
+--     ) THEN 
+--         SIGNAL SQLSTATE '45000'
+--         SET MESSAGE_TEXT = 'This branch does not exists';
+--     END IF;
 
 --     SELECT AVG(R.rating)
 --     INTO avgRating 
@@ -105,11 +123,9 @@ BEGIN
     
     DECLARE done INT DEFAULT FALSE;
     DECLARE order_price_cursor CURSOR FOR SELECT order_price FROM TempOrderPrice;
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-    
     DECLARE dlvr_fee_cursor CURSOR FOR SELECT dlvr_fee FROM TempDlvrFee;
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-    
+
     IF NOT EXISTS (
         SELECT * 
         FROM Branch AS B 
@@ -118,11 +134,12 @@ BEGIN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'This branch does not exists';
     END IF;
-    
+
+    -- Initialize variables
     SET sum_order_price = 0;
     SET sum_dlvr_fee = 0;
 
-    -- calculate order price
+    -- Loop through orders to calculate order price
     CREATE TEMPORARY TABLE TempOrderPrice (
         order_price INT
     );
@@ -140,11 +157,9 @@ BEGIN
         B.number = branch_no AND 
         B.region_id = region_id;
 
-    
-
     OPEN order_price_cursor;
 
-    read_order_price: LOOP
+    read_order_price:LOOP
         FETCH order_price_cursor INTO total_order_price;
 
         IF done THEN
@@ -156,7 +171,8 @@ BEGIN
 
     CLOSE order_price_cursor;
 
-    -- calculate delivery fee
+	SET done = false;
+    -- Loop through orders to calculate delivery fee
     CREATE TEMPORARY TABLE TempDlvrFee (
         dlvr_fee INT
     );
@@ -186,6 +202,7 @@ BEGIN
 
     CLOSE dlvr_fee_cursor;
 
+    -- Drop temporary tables
     DROP TEMPORARY TABLE IF EXISTS TempOrderPrice;
     DROP TEMPORARY TABLE IF EXISTS TempDlvrFee;
 
@@ -218,6 +235,10 @@ BEGIN
     DECLARE totalRating DECIMAL(10, 1);
     DECLARE ratingCount INT;
     DECLARE avgRating DECIMAL(10, 1);
+    
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE review_rating_cursor CURSOR FOR SELECT review_rating FROM TempReviewRating;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
     IF NOT EXISTS (
         SELECT * 
@@ -231,7 +252,6 @@ BEGIN
     SET totalRating = 0;
     SET ratingCount = 0;
 
-    -- calculate total rating and count
     CREATE TEMPORARY TABLE TempReviewRating (
         review_rating DECIMAL(10, 1)
     );
@@ -248,13 +268,9 @@ BEGIN
         B.number = branch_no AND 
         B.region_id = region_id;
 
-    DECLARE done INT DEFAULT FALSE;
-    DECLARE review_rating_cursor CURSOR FOR SELECT review_rating FROM TempReviewRating;
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-
     OPEN review_rating_cursor;
 
-    read_review_rating: LOOP
+    read_review_rating:LOOP
         FETCH review_rating_cursor INTO avgRating;
 
         IF done THEN
@@ -267,11 +283,11 @@ BEGIN
 
     CLOSE review_rating_cursor;
 
-    -- Calculate average rating
+    -- calculate average rating
     IF ratingCount > 0 THEN
         SET avgRating = totalRating / ratingCount;
     ELSE
-        SET avgRating = 0; -- Set default value if there are no ratings
+        SET avgRating = 0; -- set default value if there are no ratings
     END IF;
 
     DROP TEMPORARY TABLE IF EXISTS TempReviewRating;
