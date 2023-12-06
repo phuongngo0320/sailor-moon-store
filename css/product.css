@@ -28,7 +28,7 @@
 
 .productInfoDetail {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     font-size: 30px;
 }
 
