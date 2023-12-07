@@ -10,28 +10,26 @@
 	}
 ?>
 <?php
-                    $order_id = 12231;
+                    $order_id = 12345;
                 if (isset($_POST['id']) && isset($_POST['price'])){
                     $product_id = (int)$_POST['id'];
                     $product_price = (int)$_POST['price'];
-                    $sql = "SELECT * FROM order_detail WHERE product_id='$product_id'";
+                    $sql = "SELECT * FROM order_detail WHERE product_id='$product_id' AND order_id = '$order_id'";
                     $result = $conn->query($sql);
                     if ($result->num_rows > 0) {
-                        $sql1 = "UPDATE order_detail SET quantity = quantity + 1 WHERE product_id='$product_id'";
+                        $sql1 = "CALL update_addquantity('$order_id','$product_id');";
                         mysqli_query($conn, $sql1);
                     } else {
-                    $sql2 = "INSERT INTO order_detail VALUES($product_id,$order_id,$product_price,1,0)";
+                    $sql2 = "Call insert_orderdetail('$order_id','$product_id');";
                         mysqli_query($conn, $sql2);
                     }
                 } else if (isset($_POST['minus'])) {
                     $product_id = (int)$_POST['minus'];
-                    $sql = "UPDATE order_detail SET quantity = quantity - 1 WHERE product_id='$product_id'";
+                    $sql = "CALL update_decrquantity('$order_id','$product_id');";
                     mysqli_query($conn, $sql);
-                    $sql1 = "DELETE FROM order_detail WHERE quantity='0'";
-                    mysqli_query($conn, $sql1);
                 } else if (isset($_POST['plus'])) {
                     $product_id = (int)$_POST['plus'];
-                    $sql = "UPDATE order_detail SET quantity = quantity + 1 WHERE product_id='$product_id'";
+                    $sql = "CALL update_addquantity('$order_id','$product_id');";
                     mysqli_query($conn, $sql);
                 } else if (isset($_POST['payment'])) {
                     // $order_id = (int)$_POST['payment'];
@@ -126,10 +124,11 @@
         $subTotal += $row1["quantity"]*$row1["unit_price"];
         $discount += $row1["quantity"]*$row1["unit_price"]*$row1["promo_amount"]/100;
         $temp = $row1["product_id"];
+        $imageSrc = "images/" . $row1["product_id"] . ".jpg";
         echo "
         <div class='orderProduct'>
         <div class='orderProductDetail'>
-            <img src='https://ams.okbar.org/eweb/images/DEMO1/notavailable.jpg' class='orderImage'/>";    
+            <img src='". $imageSrc ."' class='orderImage'/>";    
             $sql2 = "SELECT name, size, material, color FROM product WHERE id='$temp'";
             $result2 = $conn->query($sql2);
             if ($result2->num_rows > 0) {    
@@ -201,9 +200,10 @@
     if ($result->num_rows > 0) {
         echo "<div class='products'>";
       while($row = $result->fetch_assoc()) {
+        $imageSrc = "images/" . $row["id"] . ".jpg";
         echo "
         <div class='product'>
-        <img class='productImg' src='https://ams.okbar.org/eweb/images/DEMO1/notavailable.jpg' alt='' />
+        <img class='productImg' src='". $imageSrc ."' alt='' />
         <div class='productInfo'>
         <span class='productTitle'>".$row["name"]."</span>
         <div class='productInfoDetail'>
