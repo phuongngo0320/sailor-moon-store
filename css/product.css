@@ -1,0 +1,145 @@
+/*Products*/
+.products {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/*EndProducts*/
+/*Product*/
+.product {
+    width: 530px;
+    padding-bottom: 20px;
+    margin: 35px;
+}
+
+.productImg {
+    width: 100%;
+    height: 450px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.productInfo {
+    margin-top: 5px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.productInfoDetail {
+    display: flex;
+    justify-content: space-around;
+    font-size: 30px;
+}
+
+.productTitle {
+    margin: 10px 0;
+    font-size: 40px;
+}
+
+/*EndProduct*/
+/*Order*/
+.orderWrapper {
+    padding: 20px;
+}
+
+h1.orderTitle {
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.orderDetail {
+    display: flex;
+    justify-content: space-between;
+}
+
+.orderLeft {
+    flex: 3;
+}
+
+.orderProduct {
+    display: flex;
+    justify-content: space-between;
+
+}
+
+.orderProductDetail {
+    flex: 2;
+    display: flex;
+}
+
+.orderImage {
+    width: 200px;
+}
+
+.orderProductDetails {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.orderPriceDetail {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.orderProductAmountContainer {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+
+
+.orderProductAmount {
+    font-size: 24px;
+    margin: 10px;
+}
+
+.orderProductPrice {
+    font-size: 30px;
+    font-weight: 200;
+
+}
+
+.Hr {
+    background-color: #eee;
+    border: none;
+    height: 1px;
+    margin: 5px 0px;
+}
+
+.orderRight {
+    flex: 1;
+    border: 0.5px solid lightgray;
+    border-radius: 10px;
+    padding: 20px;
+    height: 50vh;
+}
+
+.SummaryTitle {
+    font-weight: 200;
+}
+
+.SummaryItem {
+    margin: 30px 0px;
+    display: flex;
+    justify-content: space-between;
+}
+
+button.orderButton {
+    width: 100%;
+    padding: 10px;
+    background-color: black;
+    color: white;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/*EndOrder*/
